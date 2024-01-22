@@ -1,12 +1,14 @@
 use bevy::prelude::*;
+use camera::CameraPlugin;
 use player::PlayerPlugin;
 
+mod camera;
 mod player;
 
 fn main() {
     App::new()
-        .add_plugins((DefaultPlugins, PlayerPlugin))
-        .add_systems(Startup, (spawn_camera, spawn_light, spawn_floor))
+        .add_plugins((DefaultPlugins, PlayerPlugin, CameraPlugin))
+        .add_systems(Startup, (spawn_light, spawn_floor))
         .run();
 }
 
@@ -21,15 +23,6 @@ fn spawn_light(mut commands: Commands) {
     };
 
     commands.spawn(light);
-}
-
-fn spawn_camera(mut commands: Commands) {
-    let camera = Camera3dBundle {
-        transform: Transform::from_xyz(-2.0, 2.5, 5.0).looking_at(Vec3::ZERO, Vec3::Y),
-        ..default()
-    };
-
-    commands.spawn(camera);
 }
 
 fn spawn_floor(

@@ -1,5 +1,7 @@
 use bevy::prelude::*;
 
+use crate::camera_controller::CameraTarget;
+
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
@@ -62,6 +64,7 @@ fn spawn_player(
         },
         Speed(4.0),
         Player,
+        CameraTarget,
     );
 
     commands.spawn(player);

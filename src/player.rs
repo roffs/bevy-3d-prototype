@@ -50,22 +50,24 @@ fn player_movement(
     player_transform.translation += movement;
 }
 
-fn spawn_player(
-    mut commands: Commands,
-    mut meshes: ResMut<Assets<Mesh>>,
-    mut materials: ResMut<Assets<StandardMaterial>>,
-) {
+fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
     let player = (
-        PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
-            material: materials.add(Color::BLUE.into()),
-            transform: Transform::from_xyz(0.0, 0.5, 0.0),
+        SceneBundle {
+            scene: assets.load("player.gltf#Scene0"),
+            transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         },
         Speed(4.0),
         Player,
-        CameraTarget,
     );
 
-    commands.spawn(player);
+    commands.spawn(player).with_children(|parent| {
+        parent.spawn((
+            CameraTarget,
+            TransformBundle {
+                local: Transform::from_xyz(0.0, 1.0, 0.0),
+                ..default()
+            },
+        ));
+    });
 }

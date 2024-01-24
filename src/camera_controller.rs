@@ -77,14 +77,14 @@ fn zoom_camera(
 
 fn sync_camera_with_target(
     mut camera_query: Query<(&mut Transform, &mut CameraController)>,
-    mut target_query: Query<&mut Transform, (With<CameraTarget>, Without<CameraController>)>,
+    target_query: Query<&GlobalTransform, (With<CameraTarget>, Without<CameraController>)>,
 ) {
     let (mut camera_transform, mut camera_controller) = camera_query
         .get_single_mut()
         .expect("There should be one and only one camera with a CameraController");
 
     let target_transform = target_query
-        .get_single_mut()
+        .get_single()
         .expect("There should be one and only one CameraTarget");
 
     let mut rotation = Quat::from_rotation_y(camera_controller.yawn);
@@ -97,7 +97,7 @@ fn sync_camera_with_target(
     camera_transform.rotation = rotation;
 
     camera_controller.focus = camera_controller.focus
-        + (target_transform.translation - camera_controller.focus)
+        + (target_transform.translation() - camera_controller.focus)
             * camera_controller.movement_smoothness;
 
     camera_transform.translation = camera_controller.focus

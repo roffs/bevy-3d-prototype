@@ -37,6 +37,10 @@ fn spawn_camera(mut commands: Commands, player_query: Query<&Transform, With<Cam
             pitch,
             radius,
             offset: (2.0, 0.0),
+            focus: player_transform.translation,
+            mouse_sensitivity: 1.0,
+            scroll_sensitivity: 0.5,
+            movement_smoothness: 0.05,
         },
     );
 

@@ -6,6 +6,10 @@ pub struct CameraController {
     pub pitch: f32,
     pub radius: f32,
     pub offset: (f32, f32),
+    pub focus: Vec3,
+    pub mouse_sensitivity: f32,
+    pub scroll_sensitivity: f32,
+    pub movement_smoothness: f32,
 }
 
 #[derive(Component)]
@@ -42,8 +46,14 @@ fn orbit_camera(
         false => Vec2::ZERO,
     };
 
-    let delta_x = mouse_delta.x / window.width() * std::f32::consts::PI * 2.0;
-    let delta_y = mouse_delta.y / window.height() * std::f32::consts::PI * 2.0;
+    let delta_x = mouse_delta.x / window.width()
+        * camera_controller.mouse_sensitivity
+        * std::f32::consts::PI
+        * 2.0;
+    let delta_y = mouse_delta.y / window.height()
+        * camera_controller.mouse_sensitivity
+        * std::f32::consts::PI
+        * 2.0;
 
     camera_controller.yawn -= delta_x;
     camera_controller.pitch -= delta_y;
@@ -62,14 +72,14 @@ fn zoom_camera(
 
     let scroll_delta = scroll_events.read().map(|event| -event.y).sum::<f32>();
 
-    camera_controller.radius += scroll_delta;
+    camera_controller.radius += scroll_delta * camera_controller.scroll_sensitivity;
 }
 
 fn sync_camera_with_target(
     mut camera_query: Query<(&mut Transform, &mut CameraController)>,
     mut target_query: Query<&mut Transform, (With<CameraTarget>, Without<CameraController>)>,
 ) {
-    let (mut camera_transform, camera_controller) = camera_query
+    let (mut camera_transform, mut camera_controller) = camera_query
         .get_single_mut()
         .expect("There should be one and only one camera with a CameraController");
 
@@ -85,6 +95,12 @@ fn sync_camera_with_target(
     let pan_translation = right + up;
 
     camera_transform.rotation = rotation;
-    camera_transform.translation = (target_transform.translation + pan_translation)
-        + camera_transform.rotation * Vec3::new(0.0, 0.0, camera_controller.radius);
+
+    camera_controller.focus = camera_controller.focus
+        + (target_transform.translation - camera_controller.focus)
+            * camera_controller.movement_smoothness;
+
+    camera_transform.translation = camera_controller.focus
+        + camera_transform.rotation * Vec3::new(0.0, 0.0, camera_controller.radius)
+        + pan_translation;
 }

@@ -36,6 +36,7 @@ fn spawn_camera(mut commands: Commands, player_query: Query<&Transform, With<Cam
             yawn,
             pitch,
             radius,
+            offset: (2.0, 0.0),
         },
     );
 

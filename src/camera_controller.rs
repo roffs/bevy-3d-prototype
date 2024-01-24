@@ -5,6 +5,7 @@ pub struct CameraController {
     pub yawn: f32,
     pub pitch: f32,
     pub radius: f32,
+    pub offset: (f32, f32),
 }
 
 #[derive(Component)]
@@ -79,7 +80,11 @@ fn sync_camera_with_target(
     let mut rotation = Quat::from_rotation_y(camera_controller.yawn);
     rotation *= Quat::from_rotation_x(camera_controller.pitch);
 
+    let right = camera_transform.rotation * Vec3::X * camera_controller.offset.0;
+    let up = camera_transform.rotation * Vec3::Y * camera_controller.offset.1;
+    let pan_translation = right + up;
+
     camera_transform.rotation = rotation;
-    camera_transform.translation = target_transform.translation
+    camera_transform.translation = (target_transform.translation + pan_translation)
         + camera_transform.rotation * Vec3::new(0.0, 0.0, camera_controller.radius);
 }

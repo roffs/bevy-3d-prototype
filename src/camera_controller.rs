@@ -1,7 +1,11 @@
 use bevy::{input::mouse::*, prelude::*};
 
 #[derive(Component)]
-pub struct CameraController;
+pub struct CameraController {
+    pub yawn: f32,
+    pub pitch: f32,
+    pub radius: f32,
+}
 
 #[derive(Component)]
 pub struct CameraTarget;
@@ -10,7 +14,10 @@ pub struct CameraControllerPlugin;
 
 impl Plugin for CameraControllerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, orbit_camera);
+        app.add_systems(
+            Update,
+            (orbit_camera, zoom_camera, sync_camera_with_target).chain(),
+        );
     }
 }
 
@@ -18,10 +25,50 @@ fn orbit_camera(
     window_query: Query<&Window>,
     mut mouse_motion_event: EventReader<MouseMotion>,
     input_mouse: Res<Input<MouseButton>>,
-    mut camera_query: Query<&mut Transform, With<CameraController>>,
+    mut camera_query: Query<&mut CameraController>,
+) {
+    let mut camera_controller = camera_query
+        .get_single_mut()
+        .expect("There should be one and only one camera with a CameraController");
+
+    let window = window_query.get_single().unwrap();
+
+    let mouse_delta = match input_mouse.pressed(MouseButton::Right) {
+        true => mouse_motion_event
+            .read()
+            .map(|event| event.delta)
+            .sum::<Vec2>(),
+        false => Vec2::ZERO,
+    };
+
+    let delta_x = mouse_delta.x / window.width() * std::f32::consts::PI * 2.0;
+    let delta_y = mouse_delta.y / window.height() * std::f32::consts::PI * 2.0;
+
+    camera_controller.yawn -= delta_x;
+    camera_controller.pitch -= delta_y;
+
+    mouse_motion_event.clear();
+}
+
+fn zoom_camera(
+    mut scroll_events: EventReader<MouseWheel>,
+    // input_mouse: Res<Input<MouseButton>>,
+    mut camera_query: Query<&mut CameraController>,
+) {
+    let mut camera_controller = camera_query
+        .get_single_mut()
+        .expect("There should be one and only one camera with a CameraController");
+
+    let scroll_delta = scroll_events.read().map(|event| -event.y).sum::<f32>();
+
+    camera_controller.radius += scroll_delta;
+}
+
+fn sync_camera_with_target(
+    mut camera_query: Query<(&mut Transform, &mut CameraController)>,
     mut target_query: Query<&mut Transform, (With<CameraTarget>, Without<CameraController>)>,
 ) {
-    let mut camera_transform = camera_query
+    let (mut camera_transform, camera_controller) = camera_query
         .get_single_mut()
         .expect("There should be one and only one camera with a CameraController");
 
@@ -29,33 +76,10 @@ fn orbit_camera(
         .get_single_mut()
         .expect("There should be one and only one CameraTarget");
 
-    let window = window_query.get_single().unwrap();
+    let mut rotation = Quat::from_rotation_y(camera_controller.yawn);
+    rotation *= Quat::from_rotation_x(camera_controller.pitch);
 
-    let mut rotation_move = Vec2::ZERO;
-
-    if input_mouse.pressed(MouseButton::Right) {
-        for event in mouse_motion_event.read() {
-            rotation_move += event.delta;
-        }
-    }
-
-    if rotation_move.length_squared() > 0.0 {
-        let delta_x = rotation_move.x / window.width() * std::f32::consts::PI * 2.0;
-        let delta_y = rotation_move.y / window.height() * std::f32::consts::PI * 2.0;
-
-        let yaw = Quat::from_rotation_y(-delta_x);
-        let pitch = Quat::from_rotation_x(-delta_y);
-        camera_transform.rotation = yaw * camera_transform.rotation;
-        camera_transform.rotation *= pitch;
-
-        let rot_matrix = Mat3::from_quat(camera_transform.rotation);
-        camera_transform.translation = target_transform.translation
-            + rot_matrix.mul_vec3(Vec3::new(
-                0.0,
-                0.0,
-                (target_transform.translation - camera_transform.translation).length(),
-            ));
-    }
-
-    mouse_motion_event.clear();
+    camera_transform.rotation = rotation;
+    camera_transform.translation = target_transform.translation
+        + camera_transform.rotation * Vec3::new(0.0, 0.0, camera_controller.radius);
 }

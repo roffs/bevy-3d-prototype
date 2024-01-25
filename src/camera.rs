@@ -6,7 +6,7 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, (apply_deferred.before(spawn_camera), spawn_camera));
+        app.add_systems(PostStartup, spawn_camera);
     }
 }
 
@@ -42,6 +42,7 @@ fn spawn_camera(mut commands: Commands, player_query: Query<&Transform, With<Cam
             scroll_sensitivity: 0.5,
             movement_smoothness: 0.05,
         },
+        Name::new("Main camera"),
     );
 
     commands.spawn(camera);

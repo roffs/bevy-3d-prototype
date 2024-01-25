@@ -59,6 +59,7 @@ fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
         },
         Speed(4.0),
         Player,
+        Name::new("Player"),
     );
 
     commands.spawn(player).with_children(|parent| {

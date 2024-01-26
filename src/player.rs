@@ -109,12 +109,10 @@ fn keyboard_animation_control(
             || keyboard_input.pressed(KeyCode::D)
         {
             if *current_animation != 1 {
-                println!("Changing animation to WALK");
                 *current_animation = 1;
                 player.play(animations.0[1].clone_weak()).repeat();
             }
         } else if *current_animation != 0 {
-            println!("Changing animation to IDLE");
             *current_animation = 0;
             player.play(animations.0[0].clone_weak()).repeat();
         }

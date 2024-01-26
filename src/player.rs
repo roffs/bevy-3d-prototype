@@ -6,8 +6,14 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_player)
-            .add_systems(Update, player_movement);
+        app.add_systems(Startup, spawn_player).add_systems(
+            Update,
+            (
+                player_movement,
+                setup_scene_once_loaded,
+                keyboard_animation_control,
+            ),
+        );
     }
 }
 
@@ -16,6 +22,9 @@ struct Player;
 
 #[derive(Component)]
 struct Speed(f32);
+
+#[derive(Resource)]
+struct Animations(Vec<Handle<AnimationClip>>);
 
 fn player_movement(
     mut player_query: Query<(&mut Transform, &Speed), With<Player>>,
@@ -51,6 +60,11 @@ fn player_movement(
 }
 
 fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
+    commands.insert_resource(Animations(vec![
+        assets.load("player.gltf#Animation0"), // idle
+        assets.load("player.gltf#Animation1"), // walk
+    ]));
+
     let player = (
         SceneBundle {
             scene: assets.load("player.gltf#Scene0"),
@@ -71,4 +85,38 @@ fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
             },
         ));
     });
+}
+
+fn setup_scene_once_loaded(
+    animations: Res<Animations>,
+    mut players: Query<&mut AnimationPlayer, Added<AnimationPlayer>>,
+) {
+    for mut player in &mut players {
+        player.play(animations.0[0].clone_weak()).repeat();
+    }
+}
+
+fn keyboard_animation_control(
+    keyboard_input: Res<Input<KeyCode>>,
+    mut animation_players: Query<&mut AnimationPlayer>,
+    animations: Res<Animations>,
+    mut current_animation: Local<usize>,
+) {
+    for mut player in &mut animation_players {
+        if keyboard_input.pressed(KeyCode::W)
+            || keyboard_input.pressed(KeyCode::A)
+            || keyboard_input.pressed(KeyCode::S)
+            || keyboard_input.pressed(KeyCode::D)
+        {
+            if *current_animation != 1 {
+                println!("Changing animation to WALK");
+                *current_animation = 1;
+                player.play(animations.0[1].clone_weak()).repeat();
+            }
+        } else if *current_animation != 0 {
+            println!("Changing animation to IDLE");
+            *current_animation = 0;
+            player.play(animations.0[0].clone_weak()).repeat();
+        }
+    }
 }

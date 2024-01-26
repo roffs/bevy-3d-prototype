@@ -28,11 +28,18 @@ fn spawn_floor(
     mut commands: Commands,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    assets: Res<AssetServer>,
 ) {
+    let texture_handle = assets.load("floor_texture.png");
     let floor = (
         PbrBundle {
             mesh: meshes.add(Mesh::from(shape::Plane::from_size(15.0))),
-            material: materials.add(Color::DARK_GREEN.into()),
+            material: materials.add(StandardMaterial {
+                base_color_texture: Some(texture_handle.clone()),
+                alpha_mode: AlphaMode::Blend,
+                unlit: true,
+                ..default()
+            }),
             ..default()
         },
         Name::new("Floor"),

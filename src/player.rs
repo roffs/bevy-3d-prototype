@@ -74,7 +74,7 @@ fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         },
-        Speed(1.6),
+        Speed(1.7),
         Player,
         Name::new("Player"),
     );

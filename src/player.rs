@@ -1,4 +1,4 @@
-use bevy::{prelude::*, render::view::NoFrustumCulling};
+use bevy::prelude::*;
 
 use crate::camera_controller::CameraTarget;
 
@@ -78,7 +78,6 @@ fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
         Speed(1.7),
         Player,
         Name::new("Player"),
-        NoFrustumCulling,
     );
 
     commands.spawn(player).with_children(|parent| {

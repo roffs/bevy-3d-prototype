@@ -55,8 +55,11 @@ fn player_movement(
 
     direction.y = 0.0;
 
-    let movement = direction.normalize_or_zero() * player_speed.0 * time.delta_seconds();
-    player_transform.translation += movement;
+    if direction != Vec3::ZERO {
+        let movement = direction.normalize() * player_speed.0 * time.delta_seconds();
+        player_transform.translation += movement;
+        player_transform.look_to(-direction, Vec3::Y);
+    }
 }
 
 fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
@@ -71,7 +74,7 @@ fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
             transform: Transform::from_xyz(0.0, 0.0, 0.0),
             ..default()
         },
-        Speed(4.0),
+        Speed(1.6),
         Player,
         Name::new("Player"),
     );

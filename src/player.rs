@@ -1,4 +1,4 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, render::view::NoFrustumCulling};
 
 use crate::camera_controller::CameraTarget;
 
@@ -65,7 +65,8 @@ fn player_movement(
 fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
     commands.insert_resource(Animations(vec![
         assets.load("player.gltf#Animation0"), // idle
-        assets.load("player.gltf#Animation1"), // walk
+        assets.load("player.gltf#Animation1"), // jump
+        assets.load("player.gltf#Animation2"), // walk
     ]));
 
     let player = (
@@ -77,6 +78,7 @@ fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
         Speed(1.7),
         Player,
         Name::new("Player"),
+        NoFrustumCulling,
     );
 
     commands.spawn(player).with_children(|parent| {
@@ -113,9 +115,14 @@ fn keyboard_animation_control(
         {
             if *current_animation != 1 {
                 *current_animation = 1;
-                player.play(animations.0[1].clone_weak()).repeat();
+                player.play(animations.0[2].clone_weak()).repeat();
             }
-        } else if *current_animation != 0 {
+        } else if keyboard_input.pressed(KeyCode::Space) {
+            if *current_animation != 2 {
+                *current_animation = 2;
+                player.play(animations.0[1].clone_weak());
+            }
+        } else if *current_animation == 1 || (*current_animation == 2 && player.is_finished()) {
             *current_animation = 0;
             player.play(animations.0[0].clone_weak()).repeat();
         }

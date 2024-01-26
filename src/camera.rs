@@ -15,7 +15,7 @@ fn spawn_camera(mut commands: Commands, player_query: Query<&Transform, With<Cam
         .get_single()
         .expect("Player has not been spawned yet.");
 
-    let camera_offset = Vec3::new(2.0, 5.0, 5.0);
+    let camera_offset = Vec3::new(0.0, 5.0, 5.0);
 
     let mut camera_transform = *player_transform;
     camera_transform.translation += camera_offset;

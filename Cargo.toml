@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 bevy = { version = "0.12.0", features = ["dynamic_linking"] }
 bevy-inspector-egui = "0.22"
+bevy_rapier3d = "0.23"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]

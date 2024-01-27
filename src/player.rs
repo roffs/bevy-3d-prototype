@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 use crate::camera_controller::CameraTarget;
 
@@ -27,38 +28,39 @@ struct Speed(f32);
 struct Animations(Vec<Handle<AnimationClip>>);
 
 fn player_movement(
-    mut player_query: Query<(&mut Transform, &Speed), With<Player>>,
-    camera_query: Query<&Transform, (With<Camera3d>, Without<Player>)>,
+    mut controllers: Query<(&mut KinematicCharacterController, &mut Transform, &Speed)>,
+    camera_query: Query<&Transform, (With<Camera3d>, Without<Speed>)>,
     keys: Res<Input<KeyCode>>,
     time: Res<Time>,
 ) {
-    let (mut player_transform, player_speed) = player_query.get_single_mut().unwrap();
     let camera_transform = camera_query.get_single().unwrap();
 
-    let mut direction = Vec3::ZERO;
+    for (mut controller, mut transform, speed) in controllers.iter_mut() {
+        let mut direction = Vec3::ZERO;
 
-    if keys.pressed(KeyCode::W) {
-        direction += camera_transform.forward();
-    }
+        if keys.pressed(KeyCode::W) {
+            direction += camera_transform.forward();
+        }
 
-    if keys.pressed(KeyCode::S) {
-        direction += camera_transform.back();
-    }
+        if keys.pressed(KeyCode::S) {
+            direction += camera_transform.back();
+        }
 
-    if keys.pressed(KeyCode::D) {
-        direction += camera_transform.right();
-    }
+        if keys.pressed(KeyCode::D) {
+            direction += camera_transform.right();
+        }
 
-    if keys.pressed(KeyCode::A) {
-        direction += camera_transform.left();
-    }
+        if keys.pressed(KeyCode::A) {
+            direction += camera_transform.left();
+        }
 
-    direction.y = 0.0;
+        direction.y = 0.0;
 
-    if direction != Vec3::ZERO {
-        let movement = direction.normalize() * player_speed.0 * time.delta_seconds();
-        player_transform.translation += movement;
-        player_transform.look_to(-direction, Vec3::Y);
+        if direction != Vec3::ZERO {
+            let movement = direction.normalize() * speed.0 * time.delta_seconds();
+            controller.translation = Some(movement);
+            transform.look_to(-direction, Vec3::Y);
+        }
     }
 }
 
@@ -78,6 +80,12 @@ fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
         Speed(1.7),
         Player,
         Name::new("Player"),
+        Collider::capsule(Vec3::new(0.0, 0.3, 0.0), Vec3::new(0.0, 1.5, 0.0), 0.3),
+        KinematicCharacterController {
+            offset: CharacterLength::Absolute(0.01),
+            up: Vec3::Y,
+            ..default()
+        },
     );
 
     commands.spawn(player).with_children(|parent| {

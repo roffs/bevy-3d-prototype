@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 mod camera;
 mod camera_controller;
@@ -13,13 +14,15 @@ use world::WorldPlugin;
 
 fn main() {
     App::new()
+        .add_plugins(DefaultPlugins)
+        .add_plugins(WorldInspectorPlugin::new()) // egui integration
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::default())
+        .add_plugins(RapierDebugRenderPlugin::default())
         .add_plugins((
-            DefaultPlugins,
             PlayerPlugin,
             CameraPlugin,
             CameraControllerPlugin,
             WorldPlugin,
-            WorldInspectorPlugin::new(),
         ))
         .run();
 }

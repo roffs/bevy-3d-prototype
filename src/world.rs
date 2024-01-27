@@ -1,4 +1,5 @@
 use bevy::prelude::*;
+use bevy_rapier3d::prelude::*;
 
 pub struct WorldPlugin;
 
@@ -33,16 +34,16 @@ fn spawn_floor(
     let texture_handle = assets.load("floor_texture.png");
     let floor = (
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Plane::from_size(15.0))),
+            mesh: meshes.add(Mesh::from(shape::Plane::from_size(8.0))),
             material: materials.add(StandardMaterial {
                 base_color_texture: Some(texture_handle.clone()),
-                // alpha_mode: AlphaMode::Opaque,
-                // unlit: true,
                 ..default()
             }),
             ..default()
         },
         Name::new("Floor"),
+        RigidBody::Fixed,
+        Collider::cuboid(4.0, 0.0, 4.0),
     );
 
     commands.spawn(floor);
@@ -54,43 +55,36 @@ fn spawn_obstacles(
     mut materials: ResMut<Assets<StandardMaterial>>,
     assets: Res<AssetServer>,
 ) {
-    let blue_cube = cube_bundle(
-        &mut meshes,
-        &mut materials,
-        Transform::from_xyz(-5.0, 0.5, -3.25),
-        assets.load("grid_textures/Blue/g1800.png"),
-        String::from("Blue cube"),
+    let blue_cube = (
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
+            material: materials.add(StandardMaterial {
+                base_color_texture: Some(assets.load("grid_textures/Blue/g1800.png").clone()),
+                ..default()
+            }),
+            transform: Transform::from_xyz(-2.5, 0.5, -2.5),
+            ..default()
+        },
+        Name::new("Blue cube"),
+        RigidBody::Fixed,
+        Collider::cuboid(0.5, 0.5, 0.5),
     );
 
-    let yellow_cube = cube_bundle(
-        &mut meshes,
-        &mut materials,
-        Transform::from_xyz(3.4, 0.75, 1.5).with_scale(Vec3::splat(1.5)),
-        assets.load("grid_textures/Yellow/g2905.png"),
-        String::from("Yellow cube"),
+    let yellow_cube = (
+        PbrBundle {
+            mesh: meshes.add(Mesh::from(shape::Cube::new(1.5))),
+            material: materials.add(StandardMaterial {
+                base_color_texture: Some(assets.load("grid_textures/Yellow/g2905.png").clone()),
+                ..default()
+            }),
+            transform: Transform::from_xyz(2.0, 0.75, 2.0),
+            ..default()
+        },
+        Name::new("Yellow cube"),
+        RigidBody::Fixed,
+        Collider::cuboid(0.75, 0.75, 0.75),
     );
 
     commands.spawn(blue_cube);
     commands.spawn(yellow_cube);
-}
-
-fn cube_bundle(
-    meshes: &mut ResMut<Assets<Mesh>>,
-    materials: &mut ResMut<Assets<StandardMaterial>>,
-    transform: Transform,
-    texture_handle: Handle<Image>,
-    name: String,
-) -> (MaterialMeshBundle<StandardMaterial>, Name) {
-    (
-        PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
-            material: materials.add(StandardMaterial {
-                base_color_texture: Some(texture_handle.clone()),
-                ..default()
-            }),
-            transform,
-            ..default()
-        },
-        Name::new(name),
-    )
 }

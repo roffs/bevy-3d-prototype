@@ -1,5 +1,6 @@
-use bevy::prelude::*;
+use bevy::{prelude::*, render::view::NoFrustumCulling};
 use bevy_rapier3d::prelude::*;
+use bevy_scene_hook::{HookPlugin, HookedSceneBundle, SceneHook};
 
 use crate::camera_controller::CameraTarget;
 
@@ -7,14 +8,16 @@ pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_player).add_systems(
-            Update,
-            (
-                player_movement,
-                setup_scene_once_loaded,
-                keyboard_animation_control,
-            ),
-        );
+        app.add_plugins(HookPlugin)
+            .add_systems(Startup, spawn_player)
+            .add_systems(
+                Update,
+                (
+                    player_movement,
+                    setup_scene_once_loaded,
+                    keyboard_animation_control,
+                ),
+            );
     }
 }
 
@@ -72,10 +75,17 @@ fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
     ]));
 
     let player = (
-        SceneBundle {
-            scene: assets.load("player.gltf#Scene0"),
-            transform: Transform::from_xyz(0.0, 0.0, 0.0),
-            ..default()
+        HookedSceneBundle {
+            scene: SceneBundle {
+                scene: assets.load("player.gltf#Scene0"),
+                // transform: Transform::from_xyz(0.0, 0.0, 0.0),
+                ..default()
+            },
+            hook: SceneHook::new(|entity, commands| {
+                if entity.get::<Handle<Mesh>>().is_some() {
+                    commands.insert(NoFrustumCulling);
+                }
+            }),
         },
         Speed(1.7),
         Player,

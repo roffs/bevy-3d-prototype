@@ -59,9 +59,11 @@ fn player_movement(
 
         direction.y = 0.0;
 
+        let gravity = -Vec3::Y * time.delta_seconds();
+        let movement = direction.normalize() * speed.0 * time.delta_seconds();
+        controller.translation = Some(movement + gravity);
+
         if direction != Vec3::ZERO {
-            let movement = direction.normalize() * speed.0 * time.delta_seconds();
-            controller.translation = Some(movement);
             transform.look_to(-direction, Vec3::Y);
         }
     }

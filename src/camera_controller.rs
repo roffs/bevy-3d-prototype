@@ -73,6 +73,8 @@ fn zoom_camera(
     let scroll_delta = scroll_events.read().map(|event| -event.y).sum::<f32>();
 
     camera_controller.radius += scroll_delta * camera_controller.scroll_sensitivity;
+    camera_controller.offset.0 += scroll_delta * 0.2;
+    camera_controller.offset.1 += scroll_delta * 0.05;
 }
 
 fn sync_camera_with_target(

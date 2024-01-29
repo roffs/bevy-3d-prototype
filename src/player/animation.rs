@@ -26,10 +26,10 @@ fn initialize_animations_resource(mut commands: Commands, assets: Res<AssetServe
     #[rustfmt::skip]
     commands.insert_resource(AnimationHandles(HashMap::from([
         (PlayerState::Idle, assets.load("player.gltf#Animation0")),
-        (PlayerState::Jump, assets.load("player.gltf#Animation1")),
-        (PlayerState::Run, assets.load("player.gltf#Animation2")),
-        (PlayerState::Sprint, assets.load("player.gltf#Animation3")),
-        (PlayerState::Walk, assets.load("player.gltf#Animation4")),
+        (PlayerState::Jumping, assets.load("player.gltf#Animation1")),
+        (PlayerState::Runing, assets.load("player.gltf#Animation2")),
+        (PlayerState::Sprinting, assets.load("player.gltf#Animation3")),
+        (PlayerState::Walking, assets.load("player.gltf#Animation4")),
     ])));
 }
 
@@ -41,6 +41,8 @@ fn update_animation(
     let player_state = player_state_query.single();
 
     for mut player in &mut animation_players {
-        player.play(animations.get(player_state)).repeat();
+        if player_state != &PlayerState::Jumping {
+            player.play(animations.get(player_state)).repeat();
+        }
     }
 }

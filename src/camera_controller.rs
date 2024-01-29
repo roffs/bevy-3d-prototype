@@ -29,7 +29,7 @@ impl Plugin for CameraControllerPlugin {
 fn orbit_camera(
     window_query: Query<&Window>,
     mut mouse_motion_event: EventReader<MouseMotion>,
-    input_mouse: Res<Input<MouseButton>>,
+    mouse_input: Res<Input<MouseButton>>,
     mut camera_query: Query<&mut CameraController>,
 ) {
     let mut camera_controller = camera_query
@@ -38,13 +38,14 @@ fn orbit_camera(
 
     let window = window_query.get_single().unwrap();
 
-    let mouse_delta = match input_mouse.pressed(MouseButton::Right) {
-        true => mouse_motion_event
-            .read()
-            .map(|event| event.delta)
-            .sum::<Vec2>(),
-        false => Vec2::ZERO,
-    };
+    let mouse_delta =
+        match mouse_input.pressed(MouseButton::Right) || mouse_input.pressed(MouseButton::Left) {
+            true => mouse_motion_event
+                .read()
+                .map(|event| event.delta)
+                .sum::<Vec2>(),
+            false => Vec2::ZERO,
+        };
 
     let delta_x = mouse_delta.x / window.width()
         * camera_controller.mouse_sensitivity
@@ -63,7 +64,6 @@ fn orbit_camera(
 
 fn zoom_camera(
     mut scroll_events: EventReader<MouseWheel>,
-    // input_mouse: Res<Input<MouseButton>>,
     mut camera_query: Query<&mut CameraController>,
 ) {
     let mut camera_controller = camera_query

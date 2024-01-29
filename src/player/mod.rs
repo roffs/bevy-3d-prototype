@@ -7,7 +7,7 @@ mod controller;
 
 use crate::camera_controller::CameraTarget;
 use animation::PlayerAnimationPlugin;
-use controller::PlayerControllerPlugin;
+use controller::{PlayerControllerPlugin, PlayerState};
 
 pub struct PlayerPlugin;
 
@@ -19,17 +19,12 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-#[derive(Component, PartialEq, Eq, Hash)]
-enum PlayerState {
-    Idle,
-    Walk,
-    Run,
-    Sprint,
-    Jump,
-}
+#[derive(Component)]
+pub struct TargetDirection(Vec3);
 
 fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
     let initial_state = PlayerState::Idle;
+    let initial_direction = Vec3::new(0.0, 0.0, -1.0);
 
     let player = (
         HookedSceneBundle {
@@ -45,6 +40,7 @@ fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
             }),
         },
         initial_state,
+        TargetDirection(initial_direction),
         Collider::capsule(Vec3::new(0.0, 0.3, 0.0), Vec3::new(0.0, 1.5, 0.0), 0.3),
         KinematicCharacterController { ..default() },
         Name::new("Player"),

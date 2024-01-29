@@ -1,7 +1,16 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
-use super::TargetDirection;
+#[derive(Component)]
+pub struct MovementDirection(pub Vec3);
+
+#[derive(Bundle)]
+pub struct PlayerControllerBundle {
+    pub initial_state: PlayerState,
+    pub movement_direction: MovementDirection,
+    pub collider: Collider,
+    pub kinematic_character_controller: KinematicCharacterController,
+}
 
 pub struct PlayerControllerPlugin;
 
@@ -15,7 +24,7 @@ const WALKING_SPEED: f32 = 1.8;
 const RUNNING_SPEED: f32 = 4.0;
 
 #[derive(Component, PartialEq, Eq, Hash, Debug)]
-pub(super) enum PlayerState {
+pub enum PlayerState {
     Idle,
     Walk,
     Run,
@@ -24,7 +33,7 @@ pub(super) enum PlayerState {
 }
 
 fn update_player_state(
-    mut player_query: Query<(&mut PlayerState, &mut TargetDirection)>,
+    mut player_query: Query<(&mut PlayerState, &mut MovementDirection)>,
     camera_query: Query<&Transform, (With<Camera3d>, Without<KinematicCharacterController>)>,
     keys: Res<Input<KeyCode>>,
 ) {
@@ -57,7 +66,7 @@ fn update_player_state(
         } else {
             *player_state = PlayerState::Walk;
         }
-        *target_direction = TargetDirection(direction.normalize());
+        *target_direction = MovementDirection(direction.normalize());
     } else {
         *player_state = PlayerState::Idle;
     }
@@ -68,7 +77,7 @@ fn move_player(
         &mut KinematicCharacterController,
         &mut Transform,
         &PlayerState,
-        &TargetDirection,
+        &MovementDirection,
     )>,
     time: Res<Time>,
 ) {

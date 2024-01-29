@@ -9,6 +9,8 @@ use crate::camera_controller::CameraTarget;
 use animation::PlayerAnimationPlugin;
 use controller::{PlayerControllerPlugin, PlayerState};
 
+use self::controller::{MovementDirection, PlayerControllerBundle};
+
 pub struct PlayerPlugin;
 
 impl Plugin for PlayerPlugin {
@@ -19,18 +21,11 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-#[derive(Component)]
-pub struct TargetDirection(Vec3);
-
 fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
-    let initial_state = PlayerState::Idle;
-    let initial_direction = Vec3::new(0.0, 0.0, -1.0);
-
     let player = (
         HookedSceneBundle {
             scene: SceneBundle {
                 scene: assets.load("player.gltf#Scene0"),
-                // transform: Transform::from_xyz(0.0, 0.0, 0.0),
                 ..default()
             },
             hook: SceneHook::new(|entity, commands| {
@@ -39,10 +34,12 @@ fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
                 }
             }),
         },
-        initial_state,
-        TargetDirection(initial_direction),
-        Collider::capsule(Vec3::new(0.0, 0.3, 0.0), Vec3::new(0.0, 1.5, 0.0), 0.3),
-        KinematicCharacterController { ..default() },
+        PlayerControllerBundle {
+            initial_state: PlayerState::Idle,
+            movement_direction: MovementDirection(Vec3::new(0.0, 0.0, -1.0)),
+            collider: Collider::capsule(Vec3::new(0.0, 0.3, 0.0), Vec3::new(0.0, 1.5, 0.0), 0.3),
+            kinematic_character_controller: KinematicCharacterController { ..default() },
+        },
         Name::new("Player"),
     );
 

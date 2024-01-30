@@ -15,31 +15,22 @@ fn spawn_camera(mut commands: Commands, player_query: Query<&Transform, With<Cam
         .get_single()
         .expect("Player has not been spawned yet.");
 
-    let camera_offset = Vec3::new(0.0, 5.0, 5.0);
-
-    let mut camera_transform = *player_transform;
-    camera_transform.translation += camera_offset;
-    camera_transform = camera_transform.looking_at(player_transform.translation, Vec3::Y);
-
-    let radius = camera_offset.length();
-
-    let yawn =
-        (-camera_offset.z / (camera_offset.x.powi(2) + camera_offset.z.powi(2)).sqrt()).acos();
-    let pitch = (-camera_offset.y / radius).asin();
-
     let camera = (
         Camera3dBundle {
-            transform: camera_transform,
+            // transform: camera_transform,
             ..default()
         },
         CameraController {
-            yawn,
-            pitch,
-            radius,
-            offset: (2.0, 1.0),
+            yawn: 0.0,
+            pitch: 0.0,
+            radius: 8.0,
+            min_radius: 4.5,
+            max_radius: 12.5,
+            min_offset: Vec2::new(1.0, 0.7),
+            max_offset: Vec2::new(3.0, 2.0),
             focus: player_transform.translation,
             mouse_sensitivity: 1.0,
-            scroll_sensitivity: 0.5,
+            zoom_sensitivity: 0.5,
             movement_smoothness: 0.05,
         },
         Name::new("Main camera"),

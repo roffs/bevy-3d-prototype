@@ -41,8 +41,8 @@ fn update_animation(
     let player_state = player_state_query.single();
 
     for mut player in &mut animation_players {
-        if player_state != &PlayerState::Jumping {
-            player.play(animations.get(player_state)).repeat();
-        }
+        // if player_state != &PlayerState::Jumping {
+        player.play(animations.get(player_state)).repeat();
+        // }
     }
 }

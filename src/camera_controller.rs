@@ -1,14 +1,17 @@
 use bevy::{input::mouse::*, prelude::*};
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
 pub struct CameraController {
     pub yawn: f32,
     pub pitch: f32,
     pub radius: f32,
-    pub offset: (f32, f32),
+    pub min_radius: f32,
+    pub max_radius: f32,
+    pub max_offset: Vec2,
+    pub min_offset: Vec2,
     pub focus: Vec3,
     pub mouse_sensitivity: f32,
-    pub scroll_sensitivity: f32,
+    pub zoom_sensitivity: f32,
     pub movement_smoothness: f32,
 }
 
@@ -22,7 +25,8 @@ impl Plugin for CameraControllerPlugin {
         app.add_systems(
             Update,
             (orbit_camera, zoom_camera, sync_camera_with_target).chain(),
-        );
+        )
+        .register_type::<CameraController>();
     }
 }
 
@@ -38,20 +42,18 @@ fn orbit_camera(
 
     let window = window_query.get_single().unwrap();
 
-    let mouse_delta =
-        match mouse_input.pressed(MouseButton::Right) || mouse_input.pressed(MouseButton::Left) {
-            true => mouse_motion_event
-                .read()
-                .map(|event| event.delta)
-                .sum::<Vec2>(),
-            false => Vec2::ZERO,
-        };
+    let mouse_delta = match mouse_input.pressed(MouseButton::Right) {
+        true => mouse_motion_event
+            .read()
+            .map(|event| event.delta)
+            .sum::<Vec2>(),
+        false => Vec2::ZERO,
+    };
 
-    let delta_x = mouse_delta.x / window.width()
-        * camera_controller.mouse_sensitivity
-        * std::f32::consts::PI
-        * 2.0;
-    let delta_y = mouse_delta.y / window.height()
+    let Vec2 {
+        x: delta_x,
+        y: delta_y,
+    } = mouse_delta / window.width()
         * camera_controller.mouse_sensitivity
         * std::f32::consts::PI
         * 2.0;
@@ -72,9 +74,10 @@ fn zoom_camera(
 
     let scroll_delta = scroll_events.read().map(|event| -event.y).sum::<f32>();
 
-    camera_controller.radius += scroll_delta * camera_controller.scroll_sensitivity;
-    camera_controller.offset.0 += scroll_delta * 0.2;
-    camera_controller.offset.1 += scroll_delta * 0.05;
+    camera_controller.radius += scroll_delta * camera_controller.zoom_sensitivity;
+    camera_controller.radius = camera_controller
+        .radius
+        .clamp(camera_controller.min_radius, camera_controller.max_radius);
 }
 
 fn sync_camera_with_target(
@@ -92,8 +95,16 @@ fn sync_camera_with_target(
     let mut rotation = Quat::from_rotation_y(camera_controller.yawn);
     rotation *= Quat::from_rotation_x(camera_controller.pitch);
 
-    let right = camera_transform.rotation * Vec3::X * camera_controller.offset.0;
-    let up = camera_transform.rotation * Vec3::Y * camera_controller.offset.1;
+    let offset = {
+        let percentage = (camera_controller.radius - camera_controller.min_radius)
+            / (camera_controller.max_radius - camera_controller.min_radius);
+
+        (camera_controller.max_offset * percentage)
+            + (camera_controller.min_offset * (1.0 - percentage))
+    };
+
+    let right = camera_transform.rotation * Vec3::X * offset.x;
+    let up = camera_transform.rotation * Vec3::Y * offset.y;
     let pan_translation = right + up;
 
     camera_transform.rotation = rotation;

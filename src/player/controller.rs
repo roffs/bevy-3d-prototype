@@ -86,19 +86,16 @@ fn update_player_state(
             vertical_speed.0 = -3.0;
             if keys.pressed(KeyCode::Space) {
                 *player_state = PlayerState::Jumping;
-                vertical_speed.0 = 3.0;
-            }
-        }
-
-        if direction != Vec3::ZERO {
-            if keys.pressed(KeyCode::ShiftLeft) {
-                *player_state = PlayerState::Runing;
+            } else if direction != Vec3::ZERO {
+                if keys.pressed(KeyCode::ShiftLeft) {
+                    *player_state = PlayerState::Runing;
+                } else {
+                    *player_state = PlayerState::Walking;
+                }
+                *target_direction = MovementDirection(direction.normalize());
             } else {
-                *player_state = PlayerState::Walking;
+                *player_state = PlayerState::Idle;
             }
-            *target_direction = MovementDirection(direction.normalize());
-        } else {
-            *player_state = PlayerState::Idle;
         }
     }
 }
@@ -106,17 +103,17 @@ fn update_player_state(
 fn update_player_forward(
     mut player_query: Query<&mut ForwardDirection>,
     camera_query: Query<&Transform, (With<Camera3d>, Without<KinematicCharacterController>)>,
-    mouse_input: Res<Input<MouseButton>>,
+    // mouse_input: Res<Input<MouseButton>>,
 ) {
-    if mouse_input.pressed(MouseButton::Right) {
-        let mut forward_direction = player_query.single_mut();
-        let camera_transform = camera_query.get_single().unwrap();
+    // if mouse_input.pressed(MouseButton::Left) {
+    let mut forward_direction = player_query.single_mut();
+    let camera_transform = camera_query.get_single().unwrap();
 
-        let mut target_direction = camera_transform.forward();
-        target_direction.y = 0.0;
+    let mut target_direction = camera_transform.forward();
+    target_direction.y = 0.0;
 
-        forward_direction.0 = target_direction.normalize();
-    }
+    forward_direction.0 = target_direction.normalize();
+    // }
 }
 
 fn move_player(

@@ -1,19 +1,52 @@
 use bevy::{input::mouse::*, prelude::*};
 
-#[derive(Component, Reflect)]
-pub struct CameraController {
-    pub yawn: f32,
-    pub pitch: f32,
-    pub radius: f32,
-    pub radius_target: f32,
+pub struct CameraControllerDescriptor {
+    pub focus: Vec3,
     pub min_radius: f32,
     pub max_radius: f32,
     pub max_offset: Vec2,
     pub min_offset: Vec2,
-    pub focus: Vec3,
     pub mouse_sensitivity: f32,
     pub zoom_sensitivity: f32,
     pub movement_smoothness: f32,
+}
+
+#[derive(Component, Reflect)]
+pub struct CameraController {
+    yawn: f32,
+    pitch: f32,
+    radius: f32,
+    radius_target: f32,
+    min_radius: f32,
+    max_radius: f32,
+    max_offset: Vec2,
+    min_offset: Vec2,
+    focus: Vec3,
+    mouse_sensitivity: f32,
+    zoom_sensitivity: f32,
+    movement_smoothness: f32,
+}
+
+impl CameraController {
+    pub fn new(descriptor: CameraControllerDescriptor) -> CameraController {
+        let initial_radius =
+            descriptor.min_radius + (descriptor.max_radius - descriptor.min_radius) / 2.0;
+
+        CameraController {
+            yawn: 0.0,
+            pitch: 0.0,
+            radius: initial_radius,
+            radius_target: initial_radius,
+            min_radius: descriptor.min_radius,
+            max_radius: descriptor.max_radius,
+            max_offset: descriptor.max_offset,
+            min_offset: descriptor.min_offset,
+            focus: descriptor.focus,
+            mouse_sensitivity: descriptor.mouse_sensitivity,
+            zoom_sensitivity: descriptor.zoom_sensitivity,
+            movement_smoothness: descriptor.movement_smoothness,
+        }
+    }
 }
 
 #[derive(Component)]

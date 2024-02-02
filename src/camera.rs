@@ -16,14 +16,12 @@ fn spawn_camera(mut commands: Commands, player_query: Query<&Transform, With<Cam
         .expect("Player has not been spawned yet.");
 
     let camera = (
-        Camera3dBundle {
-            // transform: camera_transform,
-            ..default()
-        },
+        Camera3dBundle::default(),
         CameraController {
             yawn: 0.0,
             pitch: 0.0,
             radius: 8.0,
+            radius_target: 8.0,
             min_radius: 4.5,
             max_radius: 12.5,
             min_offset: Vec2::new(1.0, 0.7),

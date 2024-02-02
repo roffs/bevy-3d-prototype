@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use std::collections::HashMap;
+use std::{collections::HashMap, time::Duration};
 
 use super::PlayerState;
 
@@ -41,8 +41,8 @@ fn update_animation(
     let player_state = player_state_query.single();
 
     for mut player in &mut animation_players {
-        // if player_state != &PlayerState::Jumping {
-        player.play(animations.get(player_state)).repeat();
-        // }
+        player
+            .play_with_transition(animations.get(player_state), Duration::from_millis(100))
+            .repeat();
     }
 }

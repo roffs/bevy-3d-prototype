@@ -1,7 +1,6 @@
 use bevy::{input::mouse::*, prelude::*};
 
 pub struct CameraControllerDescriptor {
-    pub focus: Vec3,
     pub min_radius: f32,
     pub max_radius: f32,
     pub max_offset: Vec2,
@@ -33,6 +32,7 @@ impl CameraController {
             descriptor.min_radius + (descriptor.max_radius - descriptor.min_radius) / 2.0;
 
         CameraController {
+            focus: Vec3::new(0.0, 0.0, 0.0),
             yawn: 0.0,
             pitch: 0.0,
             radius: initial_radius,
@@ -41,7 +41,6 @@ impl CameraController {
             max_radius: descriptor.max_radius,
             max_offset: descriptor.max_offset,
             min_offset: descriptor.min_offset,
-            focus: descriptor.focus,
             mouse_sensitivity: descriptor.mouse_sensitivity,
             zoom_sensitivity: descriptor.zoom_sensitivity,
             movement_smoothness: descriptor.movement_smoothness,

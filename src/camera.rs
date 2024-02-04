@@ -1,4 +1,7 @@
-use bevy::prelude::*;
+use bevy::{
+    prelude::*,
+    window::{CursorGrabMode, PrimaryWindow},
+};
 
 use crate::camera_controller::{CameraController, CameraControllerDescriptor};
 
@@ -6,7 +9,7 @@ pub struct CameraPlugin;
 
 impl Plugin for CameraPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostStartup, spawn_camera);
+        app.add_systems(PostStartup, (spawn_camera, lock_cursor));
     }
 }
 
@@ -18,7 +21,7 @@ fn spawn_camera(mut commands: Commands) {
             max_radius: 12.5,
             min_offset: Vec2::new(1.0, 0.7),
             max_offset: Vec2::new(3.0, 2.0),
-            mouse_sensitivity: 1.0,
+            mouse_sensitivity: 0.5,
             zoom_sensitivity: 0.5,
             movement_smoothness: 0.05,
         }),
@@ -26,4 +29,11 @@ fn spawn_camera(mut commands: Commands) {
     );
 
     commands.spawn(camera);
+}
+
+fn lock_cursor(mut q_windows: Query<&mut Window, With<PrimaryWindow>>) {
+    let mut primary_window = q_windows.single_mut();
+
+    primary_window.cursor.grab_mode = CursorGrabMode::Locked;
+    primary_window.cursor.visible = false;
 }

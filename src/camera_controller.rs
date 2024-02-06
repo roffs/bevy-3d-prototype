@@ -1,5 +1,7 @@
 use bevy::{input::mouse::*, prelude::*};
 
+use crate::state::GameState;
+
 pub struct CameraControllerDescriptor {
     pub min_radius: f32,
     pub max_radius: f32,
@@ -60,10 +62,13 @@ impl Plugin for CameraControllerPlugin {
             (
                 orbit_camera,
                 zoom_camera_with_scroll,
-                focus_camera_with_rigut_mouse,
                 sync_camera_with_target,
             )
                 .chain(),
+        )
+        .add_systems(
+            Update,
+            focus_camera_with_right_mouse.run_if(in_state(GameState::InGame)),
         )
         .register_type::<CameraController>();
     }
@@ -73,49 +78,55 @@ fn orbit_camera(
     window_query: Query<&Window>,
     mut mouse_motion_event: EventReader<MouseMotion>,
     mut camera_query: Query<&mut CameraController>,
+    state: Res<State<GameState>>,
 ) {
-    let mut camera_controller = camera_query
-        .get_single_mut()
-        .expect("There should be one and only one camera with a CameraController");
+    if state.get() == &GameState::InGame {
+        let mut camera_controller = camera_query
+            .get_single_mut()
+            .expect("There should be one and only one camera with a CameraController");
 
-    let window = window_query.get_single().unwrap();
+        let window = window_query.get_single().unwrap();
 
-    let mouse_delta = mouse_motion_event
-        .read()
-        .map(|event| event.delta)
-        .sum::<Vec2>();
+        let mouse_delta = mouse_motion_event
+            .read()
+            .map(|event| event.delta)
+            .sum::<Vec2>();
 
-    let Vec2 {
-        x: delta_x,
-        y: delta_y,
-    } = mouse_delta / window.width()
-        * camera_controller.mouse_sensitivity
-        * std::f32::consts::PI
-        * 2.0;
+        let Vec2 {
+            x: delta_x,
+            y: delta_y,
+        } = mouse_delta / window.width()
+            * camera_controller.mouse_sensitivity
+            * std::f32::consts::PI
+            * 2.0;
 
-    camera_controller.yawn -= delta_x;
-    camera_controller.pitch -= delta_y;
-
+        camera_controller.yawn -= delta_x;
+        camera_controller.pitch -= delta_y;
+    }
     mouse_motion_event.clear();
 }
 
 fn zoom_camera_with_scroll(
     mut scroll_events: EventReader<MouseWheel>,
     mut camera_query: Query<&mut CameraController>,
+    state: Res<State<GameState>>,
 ) {
-    let mut camera_controller = camera_query
-        .get_single_mut()
-        .expect("There should be one and only one camera with a CameraController");
+    if state.get() == &GameState::InGame {
+        let mut camera_controller = camera_query
+            .get_single_mut()
+            .expect("There should be one and only one camera with a CameraController");
 
-    let scroll_delta = scroll_events.read().map(|event| -event.y).sum::<f32>();
+        let scroll_delta = scroll_events.read().map(|event| -event.y).sum::<f32>();
 
-    camera_controller.radius_target += scroll_delta * camera_controller.zoom_sensitivity;
-    camera_controller.radius_target = camera_controller
-        .radius_target
-        .clamp(camera_controller.min_radius, camera_controller.max_radius);
+        camera_controller.radius_target += scroll_delta * camera_controller.zoom_sensitivity;
+        camera_controller.radius_target = camera_controller
+            .radius_target
+            .clamp(camera_controller.min_radius, camera_controller.max_radius);
+    }
+    scroll_events.clear();
 }
 
-fn focus_camera_with_rigut_mouse(
+fn focus_camera_with_right_mouse(
     mouse_input: Res<Input<MouseButton>>,
     mut camera_query: Query<&mut CameraController>,
     mut previous_radius: Local<f32>,

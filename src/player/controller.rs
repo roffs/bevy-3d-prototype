@@ -1,6 +1,8 @@
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 
+use crate::schedule::InGameSet;
+
 #[derive(Component)]
 pub struct MovementDirection(pub Vec3);
 
@@ -35,8 +37,11 @@ impl Plugin for PlayerControllerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(
             Update,
-            (update_player_forward, update_player_state, move_player).chain(),
-        );
+            (update_player_state, update_player_forward)
+                .chain()
+                .in_set(InGameSet::UserInput),
+        )
+        .add_systems(Update, move_player.in_set(InGameSet::EntityUpdates));
     }
 }
 
@@ -103,9 +108,7 @@ fn update_player_state(
 fn update_player_forward(
     mut player_query: Query<&mut ForwardDirection>,
     camera_query: Query<&Transform, (With<Camera3d>, Without<KinematicCharacterController>)>,
-    // mouse_input: Res<Input<MouseButton>>,
 ) {
-    // if mouse_input.pressed(MouseButton::Left) {
     let mut forward_direction = player_query.single_mut();
     let camera_transform = camera_query.get_single().unwrap();
 
@@ -113,7 +116,6 @@ fn update_player_forward(
     target_direction.y = 0.0;
 
     forward_direction.0 = target_direction.normalize();
-    // }
 }
 
 fn move_player(

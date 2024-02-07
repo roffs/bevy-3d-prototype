@@ -42,8 +42,13 @@ fn update_animation(
     let player_state = player_state_query.single();
 
     for mut player in &mut animation_players {
-        player
-            .play_with_transition(animations.get(player_state), Duration::from_millis(100))
-            .repeat();
+        match player_state {
+            PlayerState::Aiming => player
+                .play_with_transition(animations.get(player_state), Duration::from_millis(100))
+                .seek_to(0.5),
+            _ => player
+                .play_with_transition(animations.get(player_state), Duration::from_millis(100))
+                .repeat(),
+        };
     }
 }

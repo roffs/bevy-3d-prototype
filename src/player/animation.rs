@@ -28,8 +28,9 @@ fn initialize_animations_resource(mut commands: Commands, assets: Res<AssetServe
         (PlayerState::Idle, assets.load("player.gltf#Animation0")),
         (PlayerState::Jumping, assets.load("player.gltf#Animation1")),
         (PlayerState::Runing, assets.load("player.gltf#Animation2")),
-        (PlayerState::Sprinting, assets.load("player.gltf#Animation3")),
-        (PlayerState::Walking, assets.load("player.gltf#Animation4")),
+        (PlayerState::Aiming, assets.load("player.gltf#Animation3")),
+        (PlayerState::Sprinting, assets.load("player.gltf#Animation4")),
+        (PlayerState::Walking, assets.load("player.gltf#Animation5")),
     ])));
 }
 

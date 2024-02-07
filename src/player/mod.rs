@@ -8,8 +8,7 @@ mod controller;
 use crate::camera_controller::CameraTarget;
 use animation::PlayerAnimationPlugin;
 use controller::{
-    ForwardDirection, MovementDirection, PlayerControllerBundle, PlayerControllerPlugin,
-    PlayerState, VerticalSpeed,
+    MovementDirection, PlayerControllerBundle, PlayerControllerPlugin, PlayerState, VerticalSpeed,
 };
 
 pub struct PlayerPlugin;
@@ -37,7 +36,6 @@ fn spawn_player(mut commands: Commands, assets: Res<AssetServer>) {
         },
         PlayerControllerBundle {
             initial_state: PlayerState::Idle,
-            initial_forward_direction: ForwardDirection(Vec3::new(0.0, 0.0, -1.0)),
             movement_direction: MovementDirection(Vec3::new(0.0, 0.0, -1.0)),
             initial_vertical_speed: VerticalSpeed(0.0),
             collider: Collider::capsule(Vec3::new(0.0, 0.3, 0.0), Vec3::new(0.0, 1.5, 0.0), 0.3),

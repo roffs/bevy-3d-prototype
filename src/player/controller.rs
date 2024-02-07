@@ -139,7 +139,11 @@ fn move_player(
 
         match player_state {
             PlayerState::Aiming => player_transform.look_to(-forward, Vec3::Y),
-            _ => player_transform.look_to(-direction, Vec3::Y),
+            _ => {
+                if movement_direction.0 != Vec3::ZERO {
+                    player_transform.look_to(-direction, Vec3::Y);
+                }
+            }
         }
     }
 }

@@ -144,15 +144,15 @@ fn move_player(
     }
 }
 
+const GRAVITY: f32 = 9.8;
 fn apply_gravity(
     mut controller_query: Query<(&KinematicCharacterControllerOutput, &mut VerticalSpeed)>,
     time: Res<Time>,
 ) {
     for (controller, mut vertical_speed) in controller_query.iter_mut() {
-        let gravity = 9.8;
         match controller.grounded {
-            true => vertical_speed.0 = 0.0,
-            false => vertical_speed.0 -= gravity * time.delta_seconds(),
+            true => vertical_speed.0 = -4.5,
+            false => vertical_speed.0 -= GRAVITY * time.delta_seconds(),
         }
     }
 }

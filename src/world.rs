@@ -13,7 +13,6 @@ fn spawn_light(mut commands: Commands) {
     let light = (
         PointLightBundle {
             point_light: PointLight {
-                intensity: 2000.0,
                 shadows_enabled: true,
                 ..default()
             },
@@ -35,7 +34,7 @@ fn spawn_floor(
     let texture_handle = assets.load("floor_texture.png");
     let floor = (
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Plane::from_size(8.0))),
+            mesh: meshes.add(Plane3d::default().mesh().size(8.0, 8.0)),
             material: materials.add(StandardMaterial {
                 base_color_texture: Some(texture_handle.clone()),
                 ..default()
@@ -58,7 +57,7 @@ fn spawn_obstacles(
 ) {
     let blue_cube = (
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
+            mesh: meshes.add(Cuboid::default().mesh()),
             material: materials.add(StandardMaterial {
                 base_color_texture: Some(assets.load("grid_textures/Blue/g1800.png").clone()),
                 ..default()
@@ -73,7 +72,7 @@ fn spawn_obstacles(
 
     let blue_cube2 = (
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
+            mesh: meshes.add(Cuboid::default().mesh()),
             material: materials.add(StandardMaterial {
                 base_color_texture: Some(assets.load("grid_textures/Blue/g1800.png").clone()),
                 ..default()
@@ -88,7 +87,7 @@ fn spawn_obstacles(
 
     let blue_cube3 = (
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
+            mesh: meshes.add(Cuboid::default().mesh()),
             material: materials.add(StandardMaterial {
                 base_color_texture: Some(assets.load("grid_textures/Blue/g1800.png").clone()),
                 ..default()
@@ -103,7 +102,7 @@ fn spawn_obstacles(
 
     let blue_cube4 = (
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
+            mesh: meshes.add(Cuboid::default().mesh()),
             material: materials.add(StandardMaterial {
                 base_color_texture: Some(assets.load("grid_textures/Blue/g1800.png").clone()),
                 ..default()
@@ -118,7 +117,7 @@ fn spawn_obstacles(
 
     let blue_cube5 = (
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube::new(1.0))),
+            mesh: meshes.add(Cuboid::default().mesh()),
             material: materials.add(StandardMaterial {
                 base_color_texture: Some(assets.load("grid_textures/Blue/g1800.png").clone()),
                 ..default()
@@ -133,7 +132,7 @@ fn spawn_obstacles(
 
     let yellow_cube = (
         PbrBundle {
-            mesh: meshes.add(Mesh::from(shape::Cube::new(1.5))),
+            mesh: meshes.add(Cuboid::default().mesh().scaled_by(Vec3::splat(1.5))),
             material: materials.add(StandardMaterial {
                 base_color_texture: Some(assets.load("grid_textures/Yellow/g2905.png").clone()),
                 ..default()

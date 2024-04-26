@@ -51,25 +51,25 @@ fn update_player_state(
         &KinematicCharacterControllerOutput,
         &mut MovementDirection,
     )>,
-    keys: Res<Input<KeyCode>>,
-    mouse: Res<Input<MouseButton>>,
+    keys: Res<ButtonInput<KeyCode>>,
+    mouse: Res<ButtonInput<MouseButton>>,
 ) {
     for (mut player_state, controller, mut movement_direction) in player_query.iter_mut() {
         let mut direction = Vec3::ZERO;
 
-        if keys.pressed(KeyCode::W) {
+        if keys.pressed(KeyCode::KeyW) {
             direction += Vec3::X;
         }
 
-        if keys.pressed(KeyCode::S) {
+        if keys.pressed(KeyCode::KeyS) {
             direction -= Vec3::X;
         }
 
-        if keys.pressed(KeyCode::D) {
+        if keys.pressed(KeyCode::KeyD) {
             direction += Vec3::Z;
         }
 
-        if keys.pressed(KeyCode::A) {
+        if keys.pressed(KeyCode::KeyA) {
             direction -= Vec3::Z;
         }
 

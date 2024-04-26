@@ -127,7 +127,7 @@ fn zoom_camera_with_scroll(
 }
 
 fn focus_camera_with_right_mouse(
-    mouse_input: Res<Input<MouseButton>>,
+    mouse_input: Res<ButtonInput<MouseButton>>,
     mut camera_query: Query<&mut CameraController>,
     mut previous_radius: Local<f32>,
 ) {
